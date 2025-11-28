@@ -1,0 +1,13 @@
+{
+  "name": "truck-website-telegram-bot",
+  "version": "1.0.0",
+  "description": "Handles file upload and sends to Telegram bot.",
+  "main": "api/telegram-upload.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "formidable": "^3.5.1",
+    "node-telegram-bot-api": "^0.64.0"
+  }
+}

